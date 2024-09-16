@@ -23,10 +23,27 @@ pipeline{
             steps{
             withSonarQubeEnv("Test_SonarQube")
                 {
-		   
-                        bat "mvn sonar:sonar"        
+                       bat "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar" 
                 }
             }
+        }
+	    stage("Publish to Artifactory"){
+            steps{
+                rtMavenDeployer(
+                    id: 'deployer',
+                    serverId: '3154027@artifactory',
+                    releaseRepo: 'sonal.nagp.2022',
+                    snapshotRepo: 'sonal.nagp.2022'
+                )
+                rtMavenRun(
+                    pom: 'pom.xml',
+                    goals: 'clean install',
+                    deployerId: 'deployer'
+                    )
+                rtPublishBuildInfo(
+                    serverId:'3154027@artifactory',
+                )
+            }        
         }
  
     }
